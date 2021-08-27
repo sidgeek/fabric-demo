@@ -1,62 +1,18 @@
 // @ts-nocheck
 import { useEffect } from "react";
 import { fabric } from "fabric";
+import useTextBox from "./useTextBox";
+import useTextVertical from "./useTextVertical";
 
 function useCustomizationHandler() {
+  useTextVertical();
+  useTextBox();
+
   /**
    * Customize fabric controls
    */
   useEffect(() => {
     fabric.Textbox.prototype._wordJoiners = /[\t\r]/;
-
-    CanvasRenderingContext2D.prototype.fillTextVertical = function (
-      text,
-      x,
-      y
-    ) {
-      var context = this;
-      var arrText = text.split("");
-      var arrWidth = arrText.map(function (letter) {
-        return context.measureText(letter).width;
-      });
-
-      var align = context.textAlign;
-      var baseline = context.textBaseline;
-
-      if (align == "left") {
-        x = x + Math.max.apply(null, arrWidth) / 2;
-      } else if (align == "right") {
-        x = x - Math.max.apply(null, arrWidth) / 2;
-      }
-      if (
-        baseline == "bottom" ||
-        baseline == "alphabetic" ||
-        baseline == "ideographic"
-      ) {
-        y = y - arrWidth[0] / 2;
-      } else if (baseline == "top" || baseline == "hanging") {
-        y = y + arrWidth[0] / 2;
-      }
-
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-
-      // 开始逐字绘制
-      arrText.forEach(function (letter, index) {
-        // 确定下一个字符的纵坐标位置
-        var letterWidth = arrWidth[index];
-
-        console.log(">>>> y fillText", letter, x, y);
-        context.fillText(letter, x, y);
-        // 旋转坐标系还原成初始态
-        // 确定下一个字符的纵坐标位置
-        var letterWidth = arrWidth[index];
-        y = y + letterWidth;
-      });
-      // 水平垂直对齐方式还原
-      context.textAlign = align;
-      context.textBaseline = baseline;
-    };
 
     /**
      * @private
@@ -78,13 +34,16 @@ function useCustomizationHandler() {
           leftOffset = this._getLineLeftOffset(i);
 
         const contents = this._textLines[i];
-        const xStart =
-          left +
-          leftOffset -
-          offsets.offsetX +
-          (this._textLines.length + 1) * heightOfLine -
-          lineHeights;
-        const yStart = top + maxHeight - offsets.offsetY;
+        const xStart = left + leftOffset - offsets.offsetX;
+        const yStart = top + lineHeights + maxHeight - offsets.offsetY;
+
+        // const xStart =
+        //   left +
+        //   leftOffset -
+        //   offsets.offsetX +
+        //   (this._textLines.length + 1) * heightOfLine -
+        //   lineHeights;
+        // const yStart = top + maxHeight - offsets.offsetY + heightOfLine;
         console.log("dg>> common", contents, xStart, yStart, i);
 
         this._renderTextLine(method, ctx, contents, xStart, yStart, i);
@@ -206,10 +165,8 @@ function useCustomizationHandler() {
 
       console.log("dg>> renderChar", _char, left, top);
 
-      // context.fillTextVertical("anglebaby和,黄晓明", canvas.width / 2, 0);
-
-      shouldFill && ctx.fillTextVertical(_char, left, top);
-      // shouldFill && ctx.fillText(_char, left, top);
+      // shouldFill && ctx.fillTextVertical(_char, left, top);
+      shouldFill && ctx.fillText(_char, left, top);
       shouldStroke && ctx.strokeText(_char, left, top);
       decl && ctx.restore();
     };
