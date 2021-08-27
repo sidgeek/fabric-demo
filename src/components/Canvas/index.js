@@ -7,11 +7,13 @@ export default function Canvas() {
 
   useEffect(() => {
     const canvas = new fabric.Canvas("my-fabric-canvas");
-    const textbox = new fabric.Textbox("中文会自动换行吗,加了配置就会了", {
+    const textbox = new fabric.Textbox("中文会自动换行吗", {
+      // const textbox = new fabric.Textbox("中文会自动换行吗,加了配置就会了", {
       fontSize: 20,
       top: 300,
       left: 800,
       width: 100,
+      borderColor: 'red',
       splitByGrapheme: true,
     });
 
