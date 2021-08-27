@@ -27,14 +27,13 @@ function useCustomizationHandler() {
         var heightOfLine = this.getHeightOfLine(i),
           maxHeight = heightOfLine / this.lineHeight,
           leftOffset = this._getLineLeftOffset(i);
-        this._renderTextLine(
-          method,
-          ctx,
-          this._textLines[i],
-          left + leftOffset - offsets.offsetX,
-          top + lineHeights + maxHeight - offsets.offsetY,
-          i
-        );
+
+        const contents = this._textLines[i];
+        const xStart = left + leftOffset - offsets.offsetX;
+        const yStart = top + lineHeights + maxHeight - offsets.offsetY;
+        console.log("dg>> common", contents, xStart, yStart, i);
+
+        this._renderTextLine(method, ctx, contents, xStart, yStart, i);
         lineHeights += heightOfLine;
       }
       ctx.restore();
@@ -64,12 +63,15 @@ function useCustomizationHandler() {
       top -= (lineHeight * this._fontSizeFraction) / this.lineHeight;
       if (shortCut) {
         // render all the line in one pass without checking
+        const contents = this.textLines[lineIndex];
+        console.log("dg>> renderChars", contents, left, top);
+
         this._renderChar(
           method,
           ctx,
           lineIndex,
           0,
-          this.textLines[lineIndex],
+          contents,
           left,
           top,
           lineHeight
@@ -147,6 +149,8 @@ function useCustomizationHandler() {
       if (decl && decl.deltaY) {
         top += decl.deltaY;
       }
+
+      console.log("dg>> renderChar", _char, left, top);
 
       shouldFill && ctx.fillText(_char, left, top);
       shouldStroke && ctx.strokeText(_char, left, top);
