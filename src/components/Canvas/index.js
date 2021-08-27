@@ -9,7 +9,8 @@ export default function Canvas() {
     const canvas = new fabric.Canvas("my-fabric-canvas");
     const textbox = new fabric.Textbox("中文会自动换行吗,加了配置就会了", {
       fontSize: 20,
-      left: 50,
+      top: 300,
+      left: 800,
       width: 100,
       splitByGrapheme: true,
     });
@@ -26,7 +27,7 @@ export default function Canvas() {
   return (
     <canvas
       id="my-fabric-canvas"
-      width="600"
+      width="1000"
       height="540"
       style={{ border: "1px solid red" }}
     />

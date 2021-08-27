@@ -27,13 +27,14 @@ function useCustomizationHandler() {
         var heightOfLine = this.getHeightOfLine(i),
           maxHeight = heightOfLine / this.lineHeight,
           leftOffset = this._getLineLeftOffset(i);
-
-        const contents = this._textLines[i];
-        const xStart = left + leftOffset - offsets.offsetX;
-        const yStart = top + lineHeights + maxHeight - offsets.offsetY;
-        // console.log("dg >>", contents, xStart, yStart, i);
-
-        this._renderTextLine(method, ctx, contents, xStart, yStart, i);
+        this._renderTextLine(
+          method,
+          ctx,
+          this._textLines[i],
+          left + leftOffset - offsets.offsetX,
+          top + lineHeights + maxHeight - offsets.offsetY,
+          i
+        );
         lineHeights += heightOfLine;
       }
       ctx.restore();
@@ -48,7 +49,6 @@ function useCustomizationHandler() {
       lineIndex
     ) {
       // set proper line offset
-      console.log("dg>> _renderChars2");
       var lineHeight = this.getHeightOfLine(lineIndex),
         isJustify = this.textAlign.indexOf("justify") !== -1,
         actualStyle,
@@ -59,69 +59,39 @@ function useCustomizationHandler() {
         timeToRender,
         shortCut =
           !isJustify && this.charSpacing === 0 && this.isEmptyStyles(lineIndex);
+
       ctx.save();
       top -= (lineHeight * this._fontSizeFraction) / this.lineHeight;
-
       if (shortCut) {
         // render all the line in one pass without checking
-        const contents = this.textLines[lineIndex];
-
-        console.log("dg>> contents", contents, left, top);
-
-        for (let i = 0, len = contents.length; i < len; i++) {
-          if (i === 0) {
-            // const text = contents;
-            const text = contents[i];
-            this._renderChar(
-              method,
-              ctx,
-              lineIndex,
-              0,
-              text,
-              left,
-              top,
-              lineHeight
-            );
-          }
-
-          if (i === 1) {
-            // const text = contents;
-            const text = contents[i];
-            this._renderChar(
-              method,
-              ctx,
-              lineIndex,
-              0,
-              text,
-              left + 25,
-              top,
-              lineHeight
-            );
-          }
-        }
-
+        this._renderChar(
+          method,
+          ctx,
+          lineIndex,
+          0,
+          this.textLines[lineIndex],
+          left,
+          top,
+          lineHeight
+        );
         ctx.restore();
         return;
       }
-
       for (var i = 0, len = line.length - 1; i <= len; i++) {
         timeToRender = i === len || this.charSpacing;
         charsToRender += line[i];
         charBox = this.__charBounds[lineIndex][i];
-
         if (boxWidth === 0) {
           left += charBox.kernedWidth - charBox.width;
           boxWidth += charBox.width;
         } else {
           boxWidth += charBox.kernedWidth;
         }
-
         if (isJustify && !timeToRender) {
           if (this._reSpaceAndTab.test(line[i])) {
             timeToRender = true;
           }
         }
-
         if (!timeToRender) {
           // if we have charSpacing, we render char by char
           actualStyle =
@@ -129,7 +99,6 @@ function useCustomizationHandler() {
           nextStyle = this.getCompleteStyleDeclaration(lineIndex, i + 1);
           timeToRender = this._hasStyleChanged(actualStyle, nextStyle);
         }
-
         if (timeToRender) {
           this._renderChar(
             method,
@@ -141,14 +110,12 @@ function useCustomizationHandler() {
             top,
             lineHeight
           );
-
           charsToRender = "";
           actualStyle = nextStyle;
           left += boxWidth;
           boxWidth = 0;
         }
       }
-
       ctx.restore();
     };
 
@@ -161,7 +128,6 @@ function useCustomizationHandler() {
       left,
       top
     ) {
-      // console.log("******* _renderChar2", _char)
       var decl = this._getStyleDeclaration(lineIndex, charIndex),
         fullDecl = this.getCompleteStyleDeclaration(lineIndex, charIndex),
         shouldFill = method === "fillText" && fullDecl.fill,
@@ -182,25 +148,8 @@ function useCustomizationHandler() {
         top += decl.deltaY;
       }
 
-      console.log("dg>> fillText", _char, left, top);
-
-      // if (_char.length === 1) {
-      //   ctx.translate(left, top);
-      //   ctx.rotate((-90 * Math.PI) / 180);
-      //   ctx.translate(-left, -top);
-      // }
-
       shouldFill && ctx.fillText(_char, left, top);
       shouldStroke && ctx.strokeText(_char, left, top);
-
-      // 旋转坐标系还原成初始态
-
-      // ctx.translate(left, top);
-      // ctx.rotate((90 * Math.PI) / 180);
-      // ctx.translate(-left, -top);
-
-      // ctx.setTransform(1, 0, 0, 1, 0, 0);
-
       decl && ctx.restore();
     };
   }, []);
