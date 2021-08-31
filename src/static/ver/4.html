@@ -1,0 +1,261 @@
+<!doctype html />
+<html>
+<head>
+<title>4_howToPutSomeVerticalTextLikeProposalFontToCanvas.html</title>
+ <style>
+  canvas#vwrMain{
+   border:1px solid black;
+  }
+  div#main{
+   margin:5px;
+  }
+ </style>
+ <script>
+ // お名前付けるときの約束ごと：
+ // ＊ newできるものは大英字ではじめるよね。
+ // ＊ 複数の単語で構成される名前の場合はcamelCaseでつなぐよね。
+ // ＊ 外からアクセスして欲しくないメンバは_で始めるよね。
+ // ＊ ローカル変数を明示したいときは_で始めるよね。
+ // ＊ 英単語を略記するのはローカル変数だけだよね。
+ // ＊ したがって略記してある変数はあえて_で始めなくてもいいよね。
+ // ＊ 引数をとるメソッドは他動詞だよね。
+ // ＊ isかhasで始まるメソッドは、明示的にtrue or falseで値を返すよね。
+
+ function nameSpace(glb,spc){
+   var ns = spc.split('.');
+   var spcs = glb;
+   for(var i=0;i<ns.length;i++){
+     spcs = spcs[ns[i]] = new Object();
+   }
+   return spcs;
+ }
+
+ (function(_global,_$){
+
+   // フォントメジャーは、実測した文字の幅と長さを取得します。
+   _$.FontMeasure = function (){
+     this._unitMeasure = _global.document.createElement('div');
+     this._unitMeasure.style.position = 'absolute';
+     this._unitMeasure.style.top = '0';
+     this._unitMeasure.style.left = '0';
+     this._unitMeasure.style.overflow = 'hidden';
+     _global.document.body.appendChild(this._unitMeasure);
+     this._canvas = _global.document.createElement('canvas');
+     this._canvas.height = 1200;
+     this._canvas.width = 1200;
+     this._sightScale = 5;
+     this._sizeDictionary = {};
+     this.measure = function(_font,chr){
+       // memoize
+       if(this._sizeDictionary[_font] && this._sizeDictionary[_font][chr]){
+         return this._sizeDictionary[_font][chr];
+       }
+       var cxt = this._canvas.getContext('2d');
+       var fsz = 1;
+       var uni = '1px';
+       var rct = null;
+       var _fontSettingSize = 1;
+       var _writedImage = null;
+       var _fontMeasuredSize = 1
+       if(_font.match(/([0-9]+(\.[0-9]+)?)(px|pt|em)/)){
+         fsz = RegExp.$1;
+         cxt.font = 
+           this._unitMeasure.style.font = _font;
+         this._unitMeasure.style.width =
+           this._unitMeasure.style.height = '1'+RegExp.$3;
+         rct = this._unitMeasure.getBoundingClientRect();
+         uni = (rct.right - rct.left);
+         _fontSettingSize = fsz * uni;
+         cxt.fillStyle = "#000000";
+         cxt.fillRect(0,0,this._canvas.width,this._canvas.height);
+         cxt.textBaseline = 'top';
+         cxt.fillStyle = cxt.strokeStyle = '#ff0000';
+         cxt.fillText(chr, 0 , 0 );
+         _writedImage = cxt.getImageData(0,0,_fontSettingSize , _fontSettingSize);
+         _fontMeasuredSize = _measureImage(_writedImage);
+         // 調整
+         _fontMeasuredSize.width += _fontSettingSize/20;
+         _fontMeasuredSize.height += _fontSettingSize/10;
+         _fontMeasuredSize.unit = _fontSettingSize;
+         
+         if( !this._sizeDictionary[_font] ){
+           this._sizeDictionary[_font] = {};
+         }
+         this._sizeDictionary[_font][chr] = _fontMeasuredSize;
+         console.log(chr+":("+_fontMeasuredSize.width+","+_fontMeasuredSize.height+")");
+         return this._sizeDictionary[_font][chr];
+       }
+       return {
+         width:void(0),
+         height:void(0),
+         unit:void(0)
+       };
+     };
+     
+     _measureImage = function(_writedImage){
+       var w = _writedImage.width;
+       var x = 0;
+       var y = 0;
+       var minX = 0;
+       var maxX = 1;
+       var minY = 0;
+       var maxY = 1;
+       for(var i=0;i<_writedImage.data.length;i+=4){
+         if(
+           _writedImage.data[i+0] > 128 // 閾値がいまいち不安
+         ){
+           if(x<minX) minX = x;
+           if(x>maxX) maxX = x;
+           if(y<minY) minY = y;
+           if(y>maxY) maxY = y;
+         }
+         x++;
+         if(x>=w){
+           x=0;
+           y++;
+         }
+       }
+       return {
+         width : maxX - minX + 1,
+         height: maxY - minY + 1
+       };
+     }
+   };
+
+   // テキストキャンバスは、キャンバスのIDを指定して、そこに文字列を縦書きします。
+   _$.TextCanvas = function(_canvasId){
+     this._fontMeasure = new _$.FontMeasure();
+     this._canvas = _global.document.getElementById(_canvasId);
+     this._fontSize = 20;
+     this._charPointMap = new Array();
+     this._text = '';
+     this.putCharVertically = function(val,fsize){
+       if(fsize) this._fontSize = fsize;
+       var cxt = this._canvas.getContext('2d');
+       var hp = 0;
+       var hps = 0;
+       var vp = 0;
+       var vps = 0;
+       var chr = '';
+       var stx = 0;
+       var _font = this._fontSize+'px Arial';
+       var msr = null
+       this._text = val;
+       cxt.clearRect(0,0,this._canvas.width,this._canvas.height);
+       cxt.font = _font;
+       this._charPointMap = new Array();
+       for(var i=0;i<val.length;i++){
+         chr = val.charAt(i);
+         msr = this._fontMeasure.measure(_font,chr);
+         un = msr.unit;
+         if(chr.match(/[、。]/)){
+           hp = -un/10;
+           vps = vps - un/2;
+         }else{
+           hp = msr.width;
+           vp = msr.height;
+         }
+         stx = this._canvas.width - un*2 - hps;
+         sty = un + vps;
+         if(
+           ( this._selectArea.st <= i && i <=this._selectArea.ed )
+                                      ||
+           ( this._selectArea.ed <= i && i <=this._selectArea.st )
+         )
+         {
+           cxt.strokeStyle = 'blue';
+           cxt.fillStyle =  'blue';
+         }else{
+           cxt.strokeStyle = 'black';
+           cxt.fillStyle =  'black';
+         }
+         cxt.textBaseLine = 'top';
+         cxt.fillText(chr, stx + un - hp/2, sty );
+         this._charPointMap[this._charPointMap.length]=(
+          function(stx,sty,s,c){
+            return function(x,y){
+              return (stx+s/2 <= x && x <= stx+s*3/2 && sty-s <= y && y <= sty)?c:-1;
+            };
+         })(stx,sty,un,i);
+         vps = vps + vp;
+         if(vps > this._canvas.height - un*2){
+           hps += un;
+           vps = 0;
+         }
+       }
+     }
+     this._selectArea={st:-1,ed:-1};
+     this._canvas.onmouseup = (
+       function(prn){
+         return function(e1){
+           var st,ed;
+           prn._canvas.onmousemove = function(e2){};
+           if(prn._selectArea.st >= 0){
+             if(prn._selectArea.st < prn._selectArea.ed){
+               st = prn._selectArea.st;
+               ed = prn._selectArea.ed+1;
+             }else{
+               st = prn._selectArea.ed;
+               ed = prn._selectArea.st+1;
+             }
+             console.log(prn._text.substring(st,ed));
+           }
+           prn._selectArea={st:-1,ed:-1};
+           prn.putCharVertically(prn._text);
+         }
+     })(this);
+     
+     this._selectText = function(num){
+       if(num < 0) return;
+       if(this._selectArea.st < 0)
+         this._selectArea.st = num;
+       this._selectArea.ed = num;
+     }
+
+     this._canvas.onmousedown =(
+       function(prn){
+        return function(e1){
+          prn._selectText(_getCharPointFromMousePosition(e1,prn));
+          prn._canvas.onmousemove = function(e2){
+            prn.putCharVertically(prn._text);
+            prn._selectText(_getCharPointFromMousePosition(e2,prn));
+          }
+        }
+       }
+     )(this);
+
+     _getCharPointFromMousePosition = function(e,prn){
+       var rect = e.target.getBoundingClientRect();
+       var x = e.clientX - rect.left;
+       var y = e.clientY - rect.top;
+       var _hits = prn._charPointMap;
+       var _hit = -1;
+       for(var i=0;i<_hits.length;i++){
+         _hit = _hits[i](x,y);
+         if(_hit>=0){
+           return _hit;
+         }
+       }
+       return -1;
+     };
+   }
+ })(
+   this,
+   nameSpace(this,'aya.eiya.test')
+ );
+ </script>
+</head>
+
+<body onload="cvs = new aya.eiya.test.TextCanvas('vwrMain');cvs.putCharVertically(document.getElementById('inMain').value);">
+ <h1>Canvasに縦書きで文字をプロポーサル風に表示する。</h1>
+ <p>HTML5のCanvasの練習です。Canvasに縦書きの文字を、文字の高さを確認しながら表示します。</p>
+ <p>割と面倒でした。</p>
+ <div id="main">
+  <canvas id="vwrMain" width="300" height="300"></canvas>
+ </div>
+ <form>
+  <input type="text" id="inMain" onkeyup="cvs.putCharVertically(this.value);"
+         value="HTML5のCanvasの練習です。Canvasに縦書きの文字を、文字の高さを確認しながら表示します。" />
+ </form>
+</body>
+</html>

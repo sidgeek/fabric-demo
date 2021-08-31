@@ -2,11 +2,21 @@
 import { useEffect } from "react";
 import { fabric } from "fabric";
 import useTextBox from "./useTextBox";
-import useTextVertical from "./useTextVertical";
+import useIText from "./useIText";
+import useTextStrokeVertical from "./useTextStrokeVertical";
+import useITextClick from "./useITextClick";
+import useITextKey from "./useITextKey";
+import useITextBehavior from "./useITextBehavior";
+import useIKeyBehavior from "./useIKeyBehavior";
 
 function useCustomizationHandler() {
-  useTextVertical();
+  useTextStrokeVertical();
+  useIText();
   useTextBox();
+  useITextClick();
+  useIKeyBehavior();
+  useITextBehavior();
+  useITextKey();
 
   /**
    * Customize fabric controls
@@ -36,15 +46,6 @@ function useCustomizationHandler() {
         const contents = this._textLines[i];
         const xStart = left + leftOffset - offsets.offsetX;
         const yStart = top + lineHeights + maxHeight - offsets.offsetY;
-
-        // const xStart =
-        //   left +
-        //   leftOffset -
-        //   offsets.offsetX +
-        //   (this._textLines.length + 1) * heightOfLine -
-        //   lineHeights;
-        // const yStart = top + maxHeight - offsets.offsetY + heightOfLine;
-        console.log("dg>> common", contents, xStart, yStart, i);
 
         this._renderTextLine(method, ctx, contents, xStart, yStart, i);
         lineHeights += heightOfLine;
@@ -77,7 +78,6 @@ function useCustomizationHandler() {
       if (shortCut) {
         // render all the line in one pass without checking
         const contents = this.textLines[lineIndex];
-        console.log("dg>> renderChars", contents, left, top);
 
         this._renderChar(
           method,
@@ -163,11 +163,10 @@ function useCustomizationHandler() {
         top += decl.deltaY;
       }
 
-      console.log("dg>> renderChar", _char, left, top);
+      console.log(">>>> renderChar", _char, left, top);
 
-      // shouldFill && ctx.fillTextVertical(_char, left, top);
-      shouldFill && ctx.fillText(_char, left, top);
-      shouldStroke && ctx.strokeText(_char, left, top);
+      shouldFill && ctx.fillTextOrStrokeVertical(_char, left, top, "text");
+      shouldStroke && ctx.fillTextOrStrokeVertical(_char, left, top, "stroke");
       decl && ctx.restore();
     };
   }, []);

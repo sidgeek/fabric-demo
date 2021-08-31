@@ -35,18 +35,34 @@ function useTextVertical() {
       context.textAlign = "center";
       context.textBaseline = "middle";
 
+      x = -40; // 小 ↑
+      y = 0; // 小 →
+
+      // x = -20; // 小 ↑
+      // y = -16; // 小 →
+
       // 开始逐字绘制
       arrText.forEach(function (letter, index) {
         // 确定下一个字符的纵坐标位置
         var letterWidth = arrWidth[index];
 
-        console.log(">>>> y fillText", letter, x, y);
+        // context.translate(x, y);
+        // // 英文字符，旋转90°
+        // context.rotate((-90 * Math.PI) / 180);
+        // context.translate(-x, -y);
+
+        // context.fillText(letter, x, y);
+        // // 旋转坐标系还原成初始态
+        // context.setTransform(1, 0, 0, 1, 0, 0);
+
         context.fillText(letter, x, y);
         // 旋转坐标系还原成初始态
         // 确定下一个字符的纵坐标位置
         var letterWidth = arrWidth[index];
-        y = y + letterWidth;
+        // y = y + letterWidth;
+        x = x + letterWidth
       });
+
       // 水平垂直对齐方式还原
       context.textAlign = align;
       context.textBaseline = baseline;

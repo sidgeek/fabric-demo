@@ -1,0 +1,51 @@
+<!-- 1_howToPutCharToCanvas.html -->
+<!doctype html />
+<html>
+<head>
+<title>1_howToPutCharToCanvas.html</title>
+ <style>
+  canvas#vwrMain{
+   border:1px solid black;
+  }
+  div#main{
+   margin:5px;
+  }
+ </style>
+ <script>
+ function nameSpace(glb,spc){
+   var ns = spc.split('.');
+   var spcs = glb;
+   for(var i=0;i<ns.length;i++){
+     spcs = spcs[ns[i]] = new Object();
+   }
+   return spcs;
+ }
+
+ (function(global,_$){
+   _$.textCanvas = function(canvasId){
+     this.Canvas = global.document.getElementById(canvasId);
+     this.putChar = function(val){
+       var _cxt = this.Canvas.getContext("2d");
+       _cxt.clearRect(0,0,300,300);
+       _cxt.font = "20pt Arial";
+       _cxt.fillText(val, 10, 50);
+     }
+   }
+ })(
+   this,
+   nameSpace(this,'aya.eiya.test')
+ );
+ </script>
+</head>
+
+<body>
+ <h1>Canvasに文字を打ち込む</h1>
+ <p>HTML5のCanvasの練習です。テキストエリアの文字をCanvasに表示します。</p>
+ <div id="main">
+  <canvas id="vwrMain"></canvas>
+ </div>
+ <form>
+  <input type="text" onkeyup="(new aya.eiya.test.textCanvas('vwrMain')).putChar(this.value);" />
+ </form>
+</body>
+</html>
