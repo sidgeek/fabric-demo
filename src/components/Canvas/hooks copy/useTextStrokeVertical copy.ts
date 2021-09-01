@@ -10,11 +10,6 @@ function useTextStrokeVertical() {
       y: number,
       type: "text" | "stroke"
     ) {
-      if (type !== "text" && type !== "stroke") {
-        console.warn(`The type ${type} is not support!`);
-        return;
-      }
-
       var context = this;
       var arrText = text.split("");
       var arrWidth = arrText.map(function (letter) {
@@ -53,7 +48,6 @@ function useTextStrokeVertical() {
 
       // 开始逐字绘制
       arrText.forEach(function (letter, index) {
-        console.log(">>>>> :", letter, isChinese(letter));
         if (isChinese(letter)) {
           /**
            * 修正中文字符的位置

@@ -7,41 +7,19 @@ export default function Canvas() {
 
   useEffect(() => {
     const canvas = new fabric.Canvas("my-fabric-canvas");
-    // const textbox = new fabric.Textbox("中文会自动换行吗,加了配置就会了", {
-    const textbox = new fabric.Textbox("e中i文", {
+    // const textbox = new fabric.Textbox("中，文。会自动换行吗,加了配置就会了", {
+    const textbox = new fabric.Textbox("中，文。", {
       fontSize: 20,
       top: 300,
       left: 800,
-      width: 300,
+      width: 100,
       borderColor: "red",
       splitByGrapheme: true,
-      // angle: 90,
-    });
-
-    const textbox2 = new fabric.Textbox("e中i文", {
-      fontSize: 30,
-      top: 200,
-      left: 800,
-      width: 300,
-      borderColor: "red",
-      splitByGrapheme: true,
-      // angle: 90,
-    });
-
-    const textbox3 = new fabric.Textbox("e中i文", {
-      fontSize: 35,
-      top: 200,
-      left: 400,
-      width: 300,
-      borderColor: "red",
-      splitByGrapheme: true,
-      // angle: 90,
+      angle: 90,
     });
 
     // canvas.add(text);
     canvas.add(textbox);
-    // canvas.add(textbox2);
-    // canvas.add(textbox3);
     canvas.renderAll();
 
     // UseEffect's cleanup function

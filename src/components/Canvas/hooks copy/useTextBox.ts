@@ -88,7 +88,6 @@ function useTextBox() {
         // wrap lines
         this._styleMap = this._generateStyleMap(this._splitText());
         // if after wrapping, the width is smaller than dynamicMinWidth, change the width and re-wrap
-        console.log(">>> initD", this.dynamicMinWidth, this.width, this.calcTextHeight());
         if (this.dynamicMinWidth > this.width) {
           this._set("width", this.dynamicMinWidth);
           // this._set("height", this.dynamicMinWidth);
