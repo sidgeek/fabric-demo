@@ -42,10 +42,7 @@ function useTextStrokeVertical() {
       context.textAlign = "center";
       context.textBaseline = "middle";
 
-      console.log(`>>>> start pos: (${x}, ${y})`);
-      console.log(">>>> arrWidth", arrWidth);
-
-      // 修正 开头向后移动半个字符
+      // 修正: 开头向后移动半个字符
       x = x + arrWidth[0] / 2;
 
       var lastIsChinese = false;

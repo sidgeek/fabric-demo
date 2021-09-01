@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { fabric } from "fabric";
 import useTextStrokeVertical from "./useTextStrokeVertical";
 
-const isVertical = false;
-
 function useCustomizationHandler() {
   useTextStrokeVertical();
 
@@ -13,6 +11,8 @@ function useCustomizationHandler() {
    */
   useEffect(() => {
     fabric.Textbox.prototype._wordJoiners = /[\t\r]/;
+
+    fabric.Textbox.prototype.isVertical = false; // 添加一个是否为竖排的标志
 
     fabric.Text.prototype._renderChar = function (
       method,
@@ -45,7 +45,7 @@ function useCustomizationHandler() {
 
       console.log(">>>> renderChar", _char, left, top);
 
-      if(isVertical) {
+      if(this.isVertical) {
         shouldFill && ctx.fillTextOrStrokeVertical(_char, left, top, "text");
         shouldStroke && ctx.fillTextOrStrokeVertical(_char, left, top, "stroke");
       } else {

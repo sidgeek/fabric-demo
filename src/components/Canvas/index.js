@@ -18,6 +18,8 @@ export default function Canvas() {
       angle: 90,
     });
 
+    textbox.isVertical = true;
+
     // canvas.add(text);
     canvas.add(textbox);
     canvas.renderAll();
