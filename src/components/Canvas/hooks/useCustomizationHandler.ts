@@ -27,14 +27,22 @@ function useCustomizationHandler() {
         fullDecl = this.getCompleteStyleDeclaration(lineIndex, charIndex),
         shouldFill = method === "fillText" && fullDecl.fill,
         shouldStroke =
-          method === "strokeText" && fullDecl.stroke && fullDecl.strokeWidth;
+          method === "strokeText" && fullDecl.stroke && fullDecl.strokeWidth,
+        fillOffsets,
+        strokeOffsets;
 
       if (!shouldStroke && !shouldFill) {
         return;
       }
-      decl && ctx.save();
+      ctx.save();
 
-      this._applyCharStyles(method, ctx, lineIndex, charIndex, fullDecl);
+      // @ts-ignore
+      shouldFill && (fillOffsets = this._setFillStyles(ctx, fullDecl));
+      // @ts-ignore
+      shouldStroke && (strokeOffsets = this._setStrokeStyles(ctx, fullDecl));
+
+      // @ts-ignore
+      ctx.font = this._getFontDeclaration(fullDecl);
 
       if (decl && decl.textBackgroundColor) {
         this._removeShadow(ctx);
@@ -43,18 +51,23 @@ function useCustomizationHandler() {
         top += decl.deltaY;
       }
 
-      console.log(">>>> renderChar", _char, left, top);
+      const offLeft = left - fillOffsets.offsetX;
+      const offTop = top - fillOffsets.offsetY;
 
-      if(this.isVertical) {
-        shouldFill && ctx.fillTextOrStrokeVertical(_char, left, top, "text");
-        shouldStroke && ctx.fillTextOrStrokeVertical(_char, left, top, "stroke");
+      // console.log(">>>> renderChar", _char, left, top);
+      // @ts-ignore
+      if (this.isVertical) {
+        shouldFill &&
+          // @ts-ignore
+          ctx.fillTextOrStrokeVertical(_char, offLeft, offTop, "text");
+        shouldStroke &&
+          // @ts-ignore
+          ctx.fillTextOrStrokeVertical(_char, offLeft, offTop, "stroke");
       } else {
-        shouldFill && ctx.fillText(_char, left, top);
-        shouldStroke && ctx.strokeText(_char, left, top);
+        shouldFill && ctx.fillText(_char, left, offTop);
+        shouldStroke && ctx.strokeText(_char, left, offTop);
       }
-
-     
-      decl && ctx.restore();
+      ctx.restore();
     };
   }, []);
 }

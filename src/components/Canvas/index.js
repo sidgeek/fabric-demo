@@ -7,15 +7,16 @@ export default function Canvas() {
 
   useEffect(() => {
     const canvas = new fabric.Canvas("my-fabric-canvas");
-    // const textbox = new fabric.Textbox("中，文。会自动换行吗,加了配置就会了", {
-    const textbox = new fabric.Textbox("中，文。", {
+    const textbox = new fabric.Textbox("中，文。会自动换行吗,加了配置就会了", {
+    // const textbox = new fabric.Textbox("年(", {
       fontSize: 20,
       top: 300,
       left: 800,
-      width: 100,
+      width: 40,
       borderColor: "red",
       splitByGrapheme: true,
       angle: 90,
+      backgroundColor: "yellow",
     });
 
     textbox.isVertical = true;

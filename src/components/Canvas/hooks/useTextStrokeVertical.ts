@@ -1,9 +1,14 @@
-// @ts-nocheck
 import { useEffect } from "react";
-import { isChinese } from "../utils/fontHelper";
+import {
+  isChinese,
+  getPosXFixAlgorithm,
+  getFontAttrType,
+  FontAttrType,
+} from "../utils/fontHelper";
 
 function useTextStrokeVertical() {
   useEffect(() => {
+    // @ts-ignore
     CanvasRenderingContext2D.prototype.fillTextOrStrokeVertical = function (
       text: string,
       x: number,
@@ -24,15 +29,15 @@ function useTextStrokeVertical() {
       var align = context.textAlign;
       var baseline = context.textBaseline;
 
-      if (align == "left") {
+      if (align === "left") {
         x = x + Math.max.apply(null, arrWidth) / 2;
       } else if (align == "right") {
         x = x - Math.max.apply(null, arrWidth) / 2;
       }
       if (
-        baseline == "bottom" ||
-        baseline == "alphabetic" ||
-        baseline == "ideographic"
+        baseline === "bottom" ||
+        baseline === "alphabetic" ||
+        baseline === "ideographic"
       ) {
         y = y - arrWidth[0] / 2;
       } else if (baseline == "top" || baseline == "hanging") {
@@ -42,41 +47,33 @@ function useTextStrokeVertical() {
       context.textAlign = "center";
       context.textBaseline = "middle";
 
-      // 修正: 开头向后移动半个字符
-      x = x + arrWidth[0] / 2;
+      const baseW = context.measureText("中").width;
+      var lastFontT: FontAttrType | null = null;
 
-      var lastIsChinese = false;
-      var lastFixWidth = 0;
+      // //修正y坐标
+      const fixY = baseW * 0.15;
+      // y = y + baseW * 0.15;
 
       // 开始逐字绘制
       arrText.forEach(function (letter, index) {
-        console.log(">>>>> :", letter, isChinese(letter));
-        if (isChinese(letter)) {
-          /**
-           * 修正中文字符的位置
-           * 英文后中文,加fixW (加fixW = width_of_last_font * 0.9)
-           * 中文后英文,减x
-           */
-          if (!lastIsChinese && index !== 0) {
-            lastFixWidth = arrWidth[index - 1] * 0.9;
-            x = x + lastFixWidth;
-          }
+        const curFontT = getFontAttrType(letter);
 
+        const fixAlgorithm = getPosXFixAlgorithm(lastFontT, curFontT, baseW);
+        const fixWidth =
+          index === 0 ? 0 : fixAlgorithm(arrWidth[index - 1], arrWidth[index]);
+        x = x - fixWidth;
+
+        console.log(">>> fixWidth", fixWidth);
+
+        if (isChinese(letter)) {
           context.save();
           context.translate(x, y);
           context.rotate((-90 * Math.PI) / 180);
           context.translate(-x, -y);
-
-          lastIsChinese = true;
-        } else {
-          if (lastIsChinese && index !== 0) {
-            x = x - lastFixWidth;
-          }
-
-          lastIsChinese = false;
         }
 
         if (type === "text") {
+          console.log(">>> fill", letter, x, y);
           context.fillText(letter, x, y);
         } else if (type === "stroke") {
           context.strokeText(letter, x, y);
@@ -86,6 +83,8 @@ function useTextStrokeVertical() {
         if (isChinese(letter)) {
           context.restore();
         }
+
+        lastFontT = curFontT;
 
         // 确定下一个字符的纵坐标位置
         var letterWidth = arrWidth[index];

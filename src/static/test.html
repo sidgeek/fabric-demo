@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <style type="text/css">
+      button {
+        color: blue;
+        cursor: move; /* fallback if grab cursor is unsupported */
+      }
+    </style>
+  </head>
   <body>
     <canvas
       id="myCanvas"
@@ -9,6 +17,8 @@
     >
       Your browser does not support the canvas element.
     </canvas>
+
+    <button onclick="">click</button>
 
     <script>
       console.log(">>>> start");
