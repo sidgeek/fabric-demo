@@ -1,44 +1,45 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { fabric } from "fabric";
-import useCustomizationHandler from "./hooks/useCustomizationHandler";
-import handleForMouseWheel from "./hooks/useMouseWheel";
 
 export default function Canvas() {
-  const [myCanvas, setMyCanvas] = useState(null);
-
-  useCustomizationHandler();
+  const [myCanvas, setMyCanvas] = useState<fabric.Canvas | null>(null);
 
   const handleClick = useCallback(() => {
     if (myCanvas) {
-      const selectObj = myCanvas._objects[0];
-      selectObj.set({"angle": selectObj.angle + 90})
-      // myCanvas.
-      myCanvas.renderAll();
     }
-  }, [myCanvas]);
+  }, []);
 
   useEffect(() => {
     const canvas = new fabric.Canvas("my-fabric-canvas");
     setMyCanvas(canvas);
     const textbox = new fabric.Textbox("中abcdefghi", {
-      // const textbox = new fabric.Textbox("年(", {
-      fontSize: 20,
       top: 300,
-      left: 800,
-      width: 200,
+      left: 400,
       borderColor: "red",
-      splitByGrapheme: true,
-      angle: 90,
       backgroundColor: "yellow",
     });
 
-    textbox.isVertical = true;
-
-    // canvas.add(text);
     canvas.add(textbox);
     canvas.renderAll();
 
-    handleForMouseWheel(canvas);
+    canvas.on("mouse:wheel", function (opt) {
+      var delta = opt.e.deltaY;
+      var zoom = canvas.getZoom();
+
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.01) zoom = 0.01;
+
+      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+
+      // 无线的增加画布的尺寸会导致界面异常卡顿
+      const oldW = canvas.getWidth();
+      const oldH = canvas.getHeight();
+      canvas.setDimensions({ width: oldW * zoom, height: oldH * zoom });
+
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+    });
 
     // UseEffect's cleanup function
     return () => {
@@ -50,7 +51,7 @@ export default function Canvas() {
     <div>
       <canvas
         id="my-fabric-canvas"
-        width="1000"
+        width="800"
         height="540"
         style={{ border: "1px solid red" }}
       />

@@ -4,7 +4,7 @@
  * @returns
  */
 
-function isChineseFont(str: string) {
+ function isChineseFont(str: string) {
   var pattern = new RegExp("[\u4E00-\u9FA5]+");
   return pattern.test(str);
 }
@@ -82,7 +82,7 @@ function getFontAttrType(str: string) {
 
 function geFixW(ratio: number, comW?: number) {
   if (!comW) {
-    console.log("Not valid param", comW);
+    console.error("Not valid param", comW);
     return 0;
   }
 
@@ -95,9 +95,15 @@ function geFixW2(baseW: number, comW?: number) {
     console.error("Not valid param", comW);
     return 0;
   }
-
-  return baseW * 0.45 - comW * 0.5;
+  return 0;
+  // return baseW * 0.45 - comW * 0.5;
 }
+
+// 用于调整竖排下,不同类型字符的切换时的位置调整
+const CHI_ALL_TO_ENG_FONT = 0.4;
+const CHI_ALL_TO_NUM = 0.6;
+const ENG_CHAR_TO_ENG_FONT = 0.2;
+const ENG_CHAR_TO_NUM = 0.2;
 
 function getPosXFixAlgorithm(
   oldT: FontAttrType | null,
@@ -110,9 +116,9 @@ function getPosXFixAlgorithm(
     if (newT === FontAttrType.ENG_CHAR) {
       return (lastW: number, curW: number) => geFixW2(baseW, curW);
     } else if (newT === FontAttrType.ENG_FONT) {
-      return (lastW: number, curW: number) => geFixW(0.1, curW);
+      return (lastW: number, curW: number) => geFixW(CHI_ALL_TO_ENG_FONT, curW);
     } else if (newT === FontAttrType.NUM) {
-      return (lastW: number, curW: number) => geFixW(0.6, curW);
+      return (lastW: number, curW: number) => geFixW(CHI_ALL_TO_NUM, curW);
     } else {
       return defFun;
     }
@@ -120,24 +126,27 @@ function getPosXFixAlgorithm(
     if (newT === FontAttrType.CHI_ALL) {
       return (lastW: number, curW: number) => -geFixW2(baseW, lastW);
     } else if (newT === FontAttrType.ENG_FONT) {
-      return (lastW: number, curW: number) => -geFixW(0.2, curW);
+      return (lastW: number, curW: number) =>
+        -geFixW(ENG_CHAR_TO_ENG_FONT, curW);
     } else if (newT === FontAttrType.NUM) {
-      return (lastW: number, curW: number) => -geFixW(0.2, curW);
+      return (lastW: number, curW: number) => -geFixW(ENG_CHAR_TO_NUM, curW);
     }
     return defFun;
   } else if (oldT === FontAttrType.ENG_FONT) {
     if (newT === FontAttrType.CHI_ALL) {
-      return (lastW: number, curW: number) => -geFixW(0.1, lastW);
+      return (lastW: number, curW: number) =>
+        -geFixW(CHI_ALL_TO_ENG_FONT, lastW);
     } else if (newT === FontAttrType.ENG_CHAR) {
-      return (lastW: number, curW: number) => geFixW(0.2, lastW);
+      return (lastW: number, curW: number) =>
+        geFixW(ENG_CHAR_TO_ENG_FONT, lastW);
     }
 
     return defFun;
   } else if (oldT === FontAttrType.NUM) {
     if (newT === FontAttrType.CHI_ALL) {
-      return (lastW: number, curW: number) => -geFixW(0.6, lastW);
+      return (lastW: number, curW: number) => -geFixW(CHI_ALL_TO_NUM, lastW);
     } else if (newT === FontAttrType.ENG_CHAR) {
-      return (lastW: number, curW: number) => geFixW(0.2, lastW);
+      return (lastW: number, curW: number) => geFixW(ENG_CHAR_TO_NUM, lastW);
     }
     return defFun;
   } else {
@@ -146,8 +155,31 @@ function getPosXFixAlgorithm(
 }
 
 function hasChineseFont(str: string) {
-  var pattern = new RegExp("[\u4E00-\u9FA5]+");
-  return pattern.test(str);
+  return isChineseFont(str);
 }
 
-export { isChinese, getFontAttrType, getPosXFixAlgorithm, hasChineseFont };
+function hasEnglishFont(str: string) {
+  return isEngListFont(str);
+}
+
+// 获取不同字符的调整比例
+const arrToMap = (arr: string[]) =>
+  arr.reduce((pre, next) => ({ ...pre, [next]: true }), {});
+const MiddleChartMap: { [k: string]: boolean } = arrToMap(["@", "%"]);
+
+function getEnglishCharAdjustRatio(str: string) {
+  if (MiddleChartMap[str]) {
+    return 0.2;
+  } else {
+    return 0.35;
+  }
+}
+
+export {
+  getEnglishCharAdjustRatio,
+  getFontAttrType,
+  getPosXFixAlgorithm,
+  hasChineseFont,
+  hasEnglishFont,
+  isChinese,
+};

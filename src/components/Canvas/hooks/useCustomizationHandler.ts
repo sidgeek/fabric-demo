@@ -11,7 +11,6 @@ function useCustomizationHandler() {
    */
   useEffect(() => {
     fabric.Textbox.prototype._wordJoiners = /[\t\r]/;
-
     fabric.Textbox.prototype.isVertical = false; // 添加一个是否为竖排的标志
 
     fabric.Text.prototype._renderChar = function (
@@ -51,22 +50,32 @@ function useCustomizationHandler() {
         top += decl.deltaY;
       }
 
-      const offLeft = left - fillOffsets.offsetX;
-      const offTop = top - fillOffsets.offsetY;
+      if (shouldFill) {
+        const fillLeft = left - fillOffsets.offsetX;
+        const fillTop = top - fillOffsets.offsetY;
 
-      // console.log(">>>> renderChar", _char, left, top);
-      // @ts-ignore
-      if (this.isVertical) {
-        shouldFill &&
+        // @ts-ignore
+        if (this.isVertical) {
           // @ts-ignore
-          ctx.fillTextOrStrokeVertical(_char, offLeft, offTop, "text");
-        shouldStroke &&
-          // @ts-ignore
-          ctx.fillTextOrStrokeVertical(_char, offLeft, offTop, "stroke");
-      } else {
-        shouldFill && ctx.fillText(_char, left, offTop);
-        shouldStroke && ctx.strokeText(_char, left, offTop);
+          ctx.fillTextOrStrokeVertical(_char, fillLeft, fillTop, "text");
+        } else {
+          ctx.fillText(_char, fillLeft, fillTop);
+        }
       }
+
+      if (shouldStroke) {
+        const strokeLeft = left - strokeOffsets.offsetX;
+        const strokeTop = top - strokeOffsets.offsetY;
+
+        // @ts-ignore
+        if (this.isVertical) {
+          // @ts-ignore
+          ctx.fillTextOrStrokeVertical(_char, strokeLeft, strokeTop, "stroke");
+        } else {
+          ctx.strokeText(_char, strokeLeft, strokeTop);
+        }
+      }
+
       ctx.restore();
     };
   }, []);

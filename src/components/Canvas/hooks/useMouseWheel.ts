@@ -1,5 +1,4 @@
 const handleForMouseWheel = (canvas: any) => {
-  console.log(">>>> canvas", canvas);
   const onMousewheel = (event: any) => {
     var delta = event.e.deltaY;
     var zoom = canvas.getZoom();

@@ -4,6 +4,8 @@ import {
   getPosXFixAlgorithm,
   getFontAttrType,
   FontAttrType,
+  getEnglishCharAdjustRatio,
+  hasEnglishFont,
 } from "../utils/fontHelper";
 
 function useTextStrokeVertical() {
@@ -29,30 +31,40 @@ function useTextStrokeVertical() {
       var align = context.textAlign;
       var baseline = context.textBaseline;
 
+      console.log(">>> arrWidth", arrWidth, align);
+
       if (align === "left") {
         x = x + Math.max.apply(null, arrWidth) / 2;
       } else if (align == "right") {
         x = x - Math.max.apply(null, arrWidth) / 2;
       }
+
+      // 保证因为字母的y值相同
+      const hasEng = hasEnglishFont(text);
+      const arrW = hasEng ? context.measureText("中").width : arrWidth[0];
+
       if (
         baseline === "bottom" ||
         baseline === "alphabetic" ||
         baseline === "ideographic"
       ) {
-        y = y - arrWidth[0] / 2;
+        y = y - arrW / 2;
       } else if (baseline == "top" || baseline == "hanging") {
-        y = y + arrWidth[0] / 2;
+        y = y + arrW / 2;
       }
 
       context.textAlign = "center";
       context.textBaseline = "middle";
 
       const baseW = context.measureText("中").width;
+      // const baseH = context.measureText("中").width;
+      console.log(`>>>> baseW:, ${baseW}`);
+
+      const adjustH = baseW * 0.11;
       var lastFontT: FontAttrType | null = null;
 
-      // //修正y坐标
-      const fixY = baseW * 0.15;
-      // y = y + baseW * 0.15;
+      //修正y坐标
+      y = y + baseW * 0.15;
 
       // 开始逐字绘制
       arrText.forEach(function (letter, index) {
@@ -63,7 +75,9 @@ function useTextStrokeVertical() {
           index === 0 ? 0 : fixAlgorithm(arrWidth[index - 1], arrWidth[index]);
         x = x - fixWidth;
 
-        console.log(">>> fixWidth", fixWidth);
+        console.log(
+          `>>>> font:, ${letter}, ${curFontT}, (${x}, ${y}), ${fixWidth}`
+        );
 
         if (isChinese(letter)) {
           context.save();
@@ -72,11 +86,21 @@ function useTextStrokeVertical() {
           context.translate(-x, -y);
         }
 
+        // 用于调整英文字符的位置
+        const AdjustEngChar = baseW * getEnglishCharAdjustRatio(letter);
+
         if (type === "text") {
-          console.log(">>> fill", letter, x, y);
-          context.fillText(letter, x, y);
+          if (!isChinese(letter) && curFontT === FontAttrType.ENG_CHAR) {
+            context.fillText(letter, x, y - AdjustEngChar);
+          } else {
+            context.fillText(letter, x, y);
+          }
         } else if (type === "stroke") {
-          context.strokeText(letter, x, y);
+          if (isChinese(letter) && curFontT === FontAttrType.ENG_CHAR) {
+            context.fillText(letter, x, y - AdjustEngChar);
+          } else {
+            context.strokeText(letter, x, y);
+          }
         }
 
         // 旋转坐标系还原成初始态
