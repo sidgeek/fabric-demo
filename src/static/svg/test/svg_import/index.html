@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>SVG Rendering | Fabric.js Demos</title>
+
+    <link rel="stylesheet" href="../../css/master.css" />
+    <link rel="stylesheet" href="../../css/ads.css" />
+    <script src="../../lib/fabric.js" data-cover></script>
+    <script src="../../js/master.js"></script>
+  </head>
+  <body class="demo">
+    <ul id="header">
+      <li><a href="/">Home</a></li>
+      <li><a href="/demos">Demos</a></li>
+      <li><a href="/articles">Tutorial</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/build">Custom Build</a></li>
+      <li><a href="/help">Support</a></li>
+      <li><a href="/test">Tests/Benchmarks</a></li>
+      <li><a href="/team">Team</a></li>
+      <li class="github secondary">
+        <!-- Place this tag where you want the button to render. -->
+        <a
+          class="github-button"
+          href="https://github.com/fabricjs/fabric.js"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Star fabricjs/fabric.js on GitHub"
+          >Star</a
+        >
+      </li>
+      <li class="twitter secondary">
+        <a
+          href="https://twitter.com/fabricjs"
+          class="twitter-follow-button"
+          data-show-count="true"
+          >Follow @fabricjs</a
+        >
+      </li>
+      <li id="carbonads-container">
+        <script
+          async
+          type="text/javascript"
+          src="//cdn.carbonads.com/carbon.js?serve=CKYIEK7E&placement=fabricjscom"
+          id="_carbonads_js"
+        ></script>
+      </li>
+    </ul>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script>
+      (function () {
+        if (document.location.hostname === "localhost") {
+          var links = document
+            .getElementById("header")
+            .getElementsByTagName("a");
+          for (var i = 0, len = links.length; i < len; i++) {
+            links[i].href = links[i].href.replace(
+              "fabricjs.com",
+              "localhost:4000"
+            );
+          }
+        } else {
+          !(function (d, s, id) {
+            var js,
+              fjs = d.getElementsByTagName(s)[0];
+            if (!d.getElementById(id)) {
+              js = d.createElement(s);
+              js.id = id;
+              js.src = "//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js, fjs);
+            }
+          })(document, "script", "twitter-wjs");
+        }
+      })();
+      (function () {
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            var ads = document.getElementById("carbonads");
+            var ads2 = document.getElementById("carbonads-container");
+            var style = window.getComputedStyle(ads2);
+            if (!ads || style.display === "none") {
+              var nag = document.getElementById("nag");
+              if (!nag) {
+                var newDiv = document.createElement("div");
+                newDiv.id = "gentle-reminder";
+                newDiv.className = "reminder";
+                newDiv.innerHTML =
+                  "Do you like fabricJS?<br />If you want it continue running and you do not mind tech related ads, please allow this website in your adblocker.<br /><br />❤️ Thank You!";
+                document.body.appendChild(newDiv);
+              }
+            }
+          }, 4000);
+        });
+      })();
+    </script>
+
+    <div id="bd-wrapper">
+      <h2><span>Fabric.js tests</span> &middot; SVG Rendering</h2>
+
+      <link rel="stylesheet" type="text/css" href="svg_import.css" />
+
+      <script>
+        fabric.Object.prototype.originX = "center";
+        fabric.Object.prototype.originY = "center";
+        fabric.Object.NUM_FRACTION_DIGITS = 4;
+
+        function initCanvas(id) {
+          var canvas;
+          fabric.loadSVGFromURL(
+            "../../assets/" + id + ".svg",
+            function (objects, options) {
+              var shape = fabric.util.groupSVGElements(objects, options);
+              var canvasEl = document.getElementById(
+                "c" + (id + "").replace("/", "_")
+              );
+              var div = document.getElementById(
+                "exp_c" + (id + "").replace("/", "_")
+              );
+              canvasEl.width = shape.getScaledWidth() || 600;
+              canvasEl.height = shape.getScaledHeight() || 600;
+
+              var iframeEl = canvasEl.parentNode.nextSibling.childNodes[1];
+              if (iframeEl) {
+                iframeEl.style.width = canvasEl.width + "px";
+                iframeEl.style.height = canvasEl.height + "px";
+              }
+              shape.top = canvasEl.height / 2;
+              shape.left = canvasEl.width / 2;
+              canvas = window["__canvas" + id] = new fabric.Canvas("c" + id, {
+                backgroundColor: "#fff",
+              });
+              canvas.add(shape);
+              div.innerHTML = canvas.toSVG();
+            }
+          );
+        }
+      </script>
+
+      <script>
+        var blacklist = [
+          150 /* svg parse error */,
+        ];
+        for (var i = 183; i >= 1; i--) {
+          if (blacklist.indexOf(i) === -1) {
+            document.write(
+              '<div class="test"><div class="block left"><p>Canvas #' +
+                i +
+                "</p>" +
+                '<canvas id="c' +
+                i +
+                '" width="300" height="300"></canvas></div>' +
+                '<div class="block"><p><a href="../../assets/' +
+                i +
+                '.svg">SVG</a></p>' +
+                '<iframe src="../../assets/' +
+                i +
+                '.svg"></iframe></div>' +
+                '<div class="block"><p><a href="../../assets/' +
+                i +
+                '.svg">EXPORTED SVG</a></p>' +
+                '<div id="exp_c' +
+                i +
+                '" ></div></div></div>'
+            );
+            initCanvas(i);
+          }
+        }
+      </script>
+    </div>
+
+    <script>
+      (function () {
+        window.addEventListener("load", function () {
+          var canvas = this.__canvas || this.canvas,
+            canvases = this.__canvases || this.canvases;
+
+          canvas && canvas.calcOffset && canvas.calcOffset();
+
+          if (canvases && canvases.length) {
+            for (var i = 0, len = canvases.length; i < len; i++) {
+              canvases[i].calcOffset();
+            }
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

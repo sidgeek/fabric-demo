@@ -5,13 +5,7 @@ export default function Canvas() {
   const [myCanvas, setMyCanvas] = useState<fabric.Canvas | null>(null);
 
   const handleClick = useCallback(() => {
-    console.log(">>>> satrt");
     if (myCanvas) {
-      const objs = myCanvas.getObjects();
-      const obj = objs[0];
-      console.log(">>>> obj", obj);
-
-      //
     }
   }, [myCanvas]);
 
@@ -26,8 +20,33 @@ export default function Canvas() {
       backgroundColor: "yellow",
     });
 
-    canvas.add(textbox);
-    canvas.renderAll();
+    var elements = [];
+    var element = new fabric.Rect({
+      type: "rect",
+      fill: "#0B61A4",
+      width: 50,
+      height: 50,
+      left: 100,
+      top: 100,
+    });
+
+    // element.set("id", 1);
+    element = element.toObject();
+    elements.push(element);
+
+    fabric.util.enlivenObjects(
+      elements,
+      function (objects: any) {
+        console.log(">>> objects", objects);
+        objects.forEach(function (o: any) {
+          canvas.add(o);
+        });
+
+        canvas.renderAll();
+      },
+      // @ts-ignore
+      null
+    );
 
     canvas.on("mouse:wheel", function (opt) {
       var delta = opt.e.deltaY;
@@ -38,12 +57,6 @@ export default function Canvas() {
       if (zoom < 0.01) zoom = 0.01;
 
       canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-
-      // 无线的增加画布的尺寸会导致界面异常卡顿
-      const oldW = canvas.getWidth();
-      const oldH = canvas.getHeight();
-      canvas.setDimensions({ width: oldW * zoom, height: oldH * zoom });
-
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });

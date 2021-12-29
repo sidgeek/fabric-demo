@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useInstance } from "@backium/use-instance";
 import MySelect from "./components/MySelect";
-import Canvas from "./components/Canvas";
+import Canvas from "./components/CanvasSelect";
 
 export class SecretManager {
   get() {

@@ -1,10 +1,10 @@
 import React from "react";
-import CanvasZoom from "./components/CanvasZoom";
+import Canvas from "./components/CanvasHideBoundary";
 
 export default function App() {
   return (
     <div className="App">
-      <CanvasZoom />
+      <Canvas />
     </div>
   );
 }

@@ -21,18 +21,10 @@ export default function Canvas() {
     const canvas = new fabric.Canvas("my-fabric-canvas");
     setMyCanvas(canvas);
     const textbox = new fabric.Textbox("中abcdefghi", {
-      // const textbox = new fabric.Textbox("年(", {
-      fontSize: 20,
-      top: 300,
-      left: 800,
-      width: 200,
-      borderColor: "red",
-      splitByGrapheme: true,
-      angle: 90,
-      backgroundColor: "yellow",
+      selectable: false
     });
 
-    textbox.isVertical = true;
+    canvas.setActiveObject(textbox)
 
     // canvas.add(text);
     canvas.add(textbox);
