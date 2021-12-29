@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fabric.js | Ellipse shadow Property</title>
+
+    <!-- FabricJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.2/fabric.min.js"></script>
+  </head>
+
+  <body>
+    <div style="text-align: center; width: 600px">
+      <h1 style="color: green">GeeksforGeeks</h1>
+      <b> Fabric.js | Ellipse shadow Property </b>
+    </div>
+
+    <div style="text-align: center">
+      <canvas
+        id="canvas"
+        width="600"
+        height="200"
+        style="border: 1px solid #000000"
+      >
+      </canvas>
+    </div>
+
+    <script>
+      // Initiate a Canvas instance
+      var canvas = new fabric.Canvas("canvas");
+
+      // Create shadow object
+      var shadow = new fabric.Shadow({
+        color: "black",
+        blur: 30,
+      });
+
+      // Initiate a Ellipse instance
+      var ellipse = new fabric.Ellipse({
+        rx: 80,
+        ry: 50,
+        shadow: shadow,
+      });
+
+      // Render the Ellipse in canvas
+      canvas.add(ellipse);
+    </script>
+  </body>
+</html>
