@@ -1,5 +1,5 @@
 import React from "react";
-import Canvas from "./components/CanvasHideBoundary";
+import Canvas from "./components/CanvasSelect";
 
 export default function App() {
   return (
@@ -8,3 +8,4 @@ export default function App() {
     </div>
   );
 }
+
