@@ -1,10 +1,11 @@
 import React from "react";
-import CanvasZoom from "./components/CanvasZoom";
+import Canvas from "./components/CanvasSelect";
 
 export default function App() {
   return (
     <div className="App">
-      <CanvasZoom />
+      <Canvas />
     </div>
   );
 }
+

@@ -1,17 +1,28 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { fabric } from "fabric";
+import { createGlobalState } from "react-hooks-global-state";
+
+const initialState = { count: 0 };
+const { useGlobalState } = createGlobalState(initialState);
+
+const Counter = () => {
+  const [count, setCount] = useGlobalState("count");
+  return (
+    <div>
+      <span>Counter: {count}</span>
+      {/* update state by passing callback function */}
+      <button onClick={() => setCount((v) => v + 1)}>+1</button>
+      {/* update state by passing new value */}
+      <button onClick={() => setCount(count - 1)}>-1</button>
+    </div>
+  );
+};
 
 export default function Canvas() {
   const [myCanvas, setMyCanvas] = useState<fabric.Canvas | null>(null);
 
   const handleClick = useCallback(() => {
-    console.log(">>>> satrt");
     if (myCanvas) {
-      const objs = myCanvas.getObjects();
-      const obj = objs[0];
-      console.log(">>>> obj", obj);
-
-      //
     }
   }, [myCanvas]);
 
@@ -63,6 +74,8 @@ export default function Canvas() {
         style={{ border: "1px solid red" }}
       />
       <button onClick={handleClick}> click</button>
+      <Counter />
+      <Counter />
     </div>
   );
 }
